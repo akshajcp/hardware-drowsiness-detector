@@ -1,180 +1,204 @@
 # Hardware-Based Drowsiness Detector
 
-A real-time, hardware-only drowsiness detection system that detects prolonged eye closure and generates an audible alert. The system is built using discrete electronic components and digital logic without a microcontroller or software.
+A hardware-only prototype that detects **sustained eye closure** as an indicator of possible drowsiness and triggers an audible alert — with no microcontroller, firmware, or software.
+
+![Prototype](media/prototype.jpg)
+
+> **Project status:** Working breadboard prototype. Validation is qualitative; this is not a safety-certified or clinically validated drowsiness detector.
 
 ## Overview
 
-Driver drowsiness can reduce alertness, reaction time, and decision-making ability, increasing the risk of accidents.
+Driver drowsiness can reduce alertness and reaction time. This project explores a simple hardware approach: detect changes in reflected infrared light from the eye, process the signal with discrete logic, measure the duration of the closed-eye condition, and activate a buzzer when the selected threshold is reached.
 
-This project detects prolonged eye closure using an infrared (IR) sensor. The sensor signal is conditioned and processed using logic gates, a timer, and a counter. If the eye remains closed beyond the preset duration, the circuit activates a buzzer to alert the user.
+The design was developed for **Logic Circuit Design** and demonstrates practical use of:
 
-The system is designed as a simple, low-cost, and practical hardware-based safety solution.
+- IR sensing
+- Digital logic gates
+- 555 timer-based timing
+- Decade counting
+- Transistor switching
+- Breadboard prototyping
 
-## Key Features
+## Key Characteristics
 
-- Hardware-only implementation
-- No microcontroller or programming
-- IR-based eye activity detection
-- Prolonged eye-closure detection
-- NOT and AND logic processing
-- NE555 timer-based timing
-- 74LS90 decade counter
-- Audible buzzer alert
-- Manual reset
-- Battery-powered prototype
+- **Hardware-only:** no microcontroller or programmable firmware
+- **Detection:** IR-based eye-state sensing
+- **Timing:** NE555-generated pulse train
+- **Duration measurement:** 74LS90 decade counter
+- **Alert:** BC547 transistor-driven buzzer
+- **Reset:** manual reset switch
+- **Prototype:** breadboard implementation
 
 ## System Architecture
 
+```text
 IR Sensor
-    ↓
-Signal Conditioning
-    ↓
+    |
+    v
+Signal Conditioning / Comparator
+    |
+    v
 74HC04 NOT Gate
-    ↓
+    |
+    v
 74HC08 AND Gate
-    ↓
-NE555 Timer
-    ↓
-74LS90 Counter
-    ↓
-BC547 Transistor
-    ↓
+    |
+    v
+NE555 Timing Stage
+    |
+    v
+74LS90 Decade Counter
+    |
+    v
+BC547 Transistor Driver
+    |
+    v
 Buzzer Alert
 
-## Working Principle
+Manual Reset Switch
+        |
+        v
+   Counter Reset
+```
 
-1. **IR Sensor**  
-   Detects reflected infrared light from the eye and produces a signal corresponding to eye status.
+The intended signal path is:
 
-2. **Signal Conditioning**  
-   The sensor output is converted into a suitable logic signal for digital processing.
+1. The IR sensor detects changes in reflected infrared light associated with eye state.
+2. A signal-conditioning stage converts the sensor output into a usable logic signal.
+3. The **74HC04** inverts the signal so the required eye-closure state can be processed by the logic stage.
+4. The **74HC08** gates the detection condition.
+5. The **NE555** provides timing pulses.
+6. The **74LS90** counts pulses while the eye-closure condition persists.
+7. When the selected condition is reached, the **BC547** drives the buzzer.
+8. A manual reset returns the circuit to its monitoring state.
 
-3. **74HC04 NOT Gate**  
-   Inverts the sensor signal so that the required eye-closure logic level is obtained.
+> **Schematic note:** `media/circuit-diagram.png` documents the main logic, timing, counter, driver, and buzzer stages. The IR sensor/front-end is visible in the physical prototype but is not fully represented as a separate block in the supplied schematic.
 
-4. **74HC08 AND Gate**  
-   Combines the eye-closure signal with the timing condition and helps reject short-duration blinks.
+## Hardware
 
-5. **NE555 Timer**  
-   Generates timing pulses used to measure the duration of eye closure.
-
-6. **74LS90 Counter**  
-   Counts the timing pulses while the eye remains closed. A sustained closure beyond the preset threshold is treated as drowsiness.
-
-7. **BC547 Transistor**  
-   Acts as the driver for the alert circuit.
-
-8. **Buzzer**  
-   Generates an audible warning when drowsiness is detected.
-
-9. **Manual Reset**  
-   Resets the counter and prepares the system for another detection cycle.
+| Component | Role |
+|---|---|
+| IR sensor module | Detects eye-state changes using reflected infrared light |
+| Signal conditioning / comparator stage | Converts the sensor output into a logic-compatible signal |
+| 74HC04 | Inverts the conditioned signal |
+| 74HC08 | Gates the eye-closure condition |
+| NE555 | Generates timing pulses |
+| 74LS90 | Counts timing pulses to represent closure duration |
+| BC547 | Drives the buzzer stage |
+| Piezo buzzer | Audible warning |
+| Resistors & capacitors | Timing, biasing, filtering, and signal shaping |
+| Voltage regulator | Provides the regulated circuit supply |
+| 9V battery | Prototype power source |
+| Reset switch | Manually resets the detection cycle |
+| Breadboard & jumper wires | Prototype interconnection |
 
 ## Detection Threshold
 
-The system is designed to distinguish normal blinking from prolonged eye closure.
+The project documentation uses an **approximately 5-second sustained eye-closure interval as the design target**.
 
-**Preset eye-closure threshold: approximately 5 seconds**
+```text
+Short eye closure
+       |
+       v
+  No alarm intended
 
-Short blinks are intended to be ignored, while sustained eye closure triggers the alert.
+Sustained closure
+       |
+       v
+555 timing pulses
+       |
+       v
+74LS90 counts duration
+       |
+       v
+Threshold reached
+       |
+       v
+Buzzer alert
+```
 
-## Hardware Components
+The ~5-second value is a **design target**, not a specification independently validated with logged timing measurements.
 
-| Component | Function |
-|---|---|
-| IR Sensor | Eye activity detection |
-| Comparator / Signal Conditioning | Converts sensor output to logic signal |
-| 74HC04 | NOT gate |
-| 74HC08 | AND gate |
-| 74LS90 | Decade counter |
-| NE555 | Timer and pulse generation |
-| BC547 | Buzzer driver |
-| Buzzer | Audible alert |
-| Resistors | Timing and signal conditioning |
-| Capacitors | Timing and filtering |
-| Voltage Regulator | Provides regulated supply |
-| 9V Battery | Power source |
-| Reset Switch | Manual reset |
-| Jumper Wires | Circuit connections |
+## Prototype
 
-## Circuit Diagram
+The physical implementation was built on a breadboard. During the documented testing, the IR sensor was positioned approximately **2–3 cm from the eye**.
 
-![Circuit Diagram](Circuit/circuit-diagram.png)
+![Circuit Diagram](media/circuit-diagram.png)
 
-## Hardware Prototype
-
-![Hardware Prototype](Prototype/prototype.jpg)
+![Breadboard Prototype](media/prototype.jpg)
 
 ## Testing
 
-The prototype was tested under different operating conditions.
+The documented prototype testing considered:
 
-### Test Conditions
-
-- IR sensor positioned approximately 2–3 cm from the eye
-- Daylight conditions
+- Different eye-closure durations
+- Daylight
 - Indoor lighting
 - Low-light conditions
-- Different eye-closure durations
-- Manual reset after detection
+- Manual reset between detection cycles
 
-### Observations
+The reported observations were qualitative: the sensor provided a usable distinction between open- and closed-eye conditions, the logic/timing stages responded to the detected condition, and the buzzer produced an audible warning when the selected condition was reached.
 
-- The IR sensor distinguished between open and closed eye conditions.
-- Logic gates processed the detection signal.
-- The counter tracked the duration of eye closure.
-- Short blinks were intended to be filtered out.
-- The buzzer produced an audible alert when the drowsiness condition was reached.
-- The manual reset returned the system to its monitoring state.
-
-## Advantages
-
-- No programming required
-- No microcontroller required
-- Low-cost components
-- Real-time response
-- Simple circuit architecture
-- Easy to assemble and maintain
-- Suitable for battery-powered operation
-- Useful for digital electronics education
-
-## Applications
-
-- Driver safety systems
-- Vehicle safety applications
-- Industrial safety
-- Fatigue monitoring
-- Educational electronics projects
-- Hardware-based alert systems
+No statistical accuracy study, logged trial dataset, or independently measured performance percentage is included in the project documentation.
 
 ## Limitations
 
-The current prototype can be affected by sensor positioning and ambient lighting. Further calibration and improved filtering would be required for more robust operation across different users and environments.
+This prototype should be treated as an educational hardware design, not as a production safety system.
 
-## Future Improvements
+Known limitations include:
 
-- Improve IR sensor calibration for different users
-- Reduce sensitivity to ambient light
-- Improve signal filtering
-- Use adaptive sensing
-- Add wireless alerts
-- Add data logging
-- Add environmental compensation
-- Develop a more compact PCB implementation
+- IR sensor placement and calibration can affect detection.
+- Ambient lighting may influence sensor behavior.
+- User-to-user differences can affect sensing.
+- Breadboard construction is less mechanically robust than a finished PCB.
+- The supplied documentation does not provide a complete statistical validation dataset.
+- The exact regulator implementation is inconsistent across the original project materials and should be verified against the physical circuit before construction.
+- The complete sensor/comparator front-end is not fully captured in the supplied schematic.
+- The behaviour of the second AND-gate input and some reset/inter-blink logic details are not fully documented.
 
-## Project Information
+## Project Status
 
-| Category | Details |
-|---|---|
-| Course | Logic Circuit Design |
-| Domain | Digital Electronics / Hardware Systems |
-| Implementation | Hardware-only |
-| Microcontroller | None |
-| Software / Code | None |
-| Detection Method | IR eye-closure sensing |
-| Alert | Audible buzzer |
-| Prototype | Breadboard |
+**Implementation:** Breadboard prototype  
+**Architecture:** Hardware-only  
+**Microcontroller:** None  
+**Firmware:** None  
+**Primary detection method:** IR-based eye-closure sensing  
+**Alert mechanism:** Audible buzzer  
+**Validation level:** Qualitative prototype testing  
+**Safety certification:** None
 
 ## Documentation
 
-The detailed project report and presentation will be added to this repository.
+The longer engineering report contains additional design details, testing notes, limitations, and known documentation inconsistencies.
+
+- [`PROJECT_REPORT.md`](PROJECT_REPORT.md)
+
+## Repository Structure
+
+```text
+hardware-drowsiness-detector/
+├── README.md
+├── PROJECT_REPORT.md
+└── media/
+    ├── circuit-diagram.png
+    └── prototype.jpg
+```
+
+## Future Improvements
+
+Potential next steps include:
+
+- Calibrated IR sensing for different users
+- Better rejection of ambient-light variation
+- More clearly documented sensor and comparator circuitry
+- Quantitative timing and detection experiments
+- Logged test data and defined performance metrics
+- PCB implementation
+- Wireless alerting and data logging
+- Environmental compensation
+
+---
+
+**Project type:** Academic hardware prototype  
+**Domain:** Digital Electronics / Embedded Hardware Concepts  
+**Focus:** Sensor interfacing, logic gates, timing, counting, and hardware alert generation
